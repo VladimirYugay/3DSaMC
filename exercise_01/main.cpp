@@ -59,7 +59,7 @@ bool WriteMesh(Vertex* vertices, unsigned int width, unsigned int height, const 
 int main()
 {
 	// Make sure this path points to the data folder
-	std::string filenameIn = "../data/rgbd_dataset_freiburg1_xyz/";
+	std::string filenameIn = "../../data/rgbd_dataset_freiburg1_xyz/";
 	std::string filenameBaseOut = "mesh_";
 
 	// load video
@@ -101,7 +101,23 @@ int main()
 		// vertices[idx].color = Vector4uc(0,0,0,0);
 		// otherwise apply back-projection and transform the vertex to world space, use the corresponding color from the colormap
 		Vertex* vertices = new Vertex[sensor.GetDepthImageWidth() * sensor.GetDepthImageHeight()];
-		
+		for (size_t i = 0; i < sensor.GetDepthImageWidth; i++) {
+			for (size_t j = 0; j < sensor.GetDepthImageHeight; j++){
+				size_t idx = i * sensor.GetDepthImageWidth() + j;
+				if (depthMap[idx] == MINF){
+					vertices[idx].position = Vector4f(MINF, MINF, MINF, MINF);
+					vertices[idx].color = Vector4uc(0,0,0,0);
+				}else {
+					Vector3f pPixel(i * depthMap[idx], j * depthMap[idx], depthMap[idx]);
+					Vector4f pImage = MatrixXf::Identity(4, 3) * depthIntrinsics.inverse() * pPixel;
+					Vector4f pCamera = trajectory.inverse() * pImage;
+					vertices[idx].position = pCamera;
+					vertices[idx].color = Vector4uc(
+						colorMap[4 * idx + 0], colorMap[4 * idx + 1],
+						colorMap[4 * idx + 2], colorMap[4 * idx + 3]);	
+				}
+			}
+		}		
 
 
 		// write mesh file
