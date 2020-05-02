@@ -16,6 +16,24 @@ struct Vertex
 	Vector4uc color;
 };
 
+bool IsValidVertice(const Vertex& vertex)
+{
+	return vertex.position[0] != MINF && 
+		   vertex.position[1] != MINF &&
+		   vertex.position[2] != MINF;
+}
+
+void WriteVertex(std::ofstream& outFile, const Vertex& vertex)
+{
+	outFile << vertex.position[0] << " " 
+			<< vertex.position[1] << " " 
+			<< vertex.position[2] << " " 
+			<< (int)vertex.color[0] << " " 
+			<< (int)vertex.color[1] << " " 
+			<< (int)vertex.color[2] << " " 
+			<< (int)vertex.color[3] << std::endl;
+}
+
 bool WriteMesh(Vertex* vertices, unsigned int width, unsigned int height, const std::string& filename)
 {
 	float edgeThreshold = 0.01f; // 1cm
@@ -29,7 +47,7 @@ bool WriteMesh(Vertex* vertices, unsigned int width, unsigned int height, const 
 	// - only write triangles with valid vertices and an edge length smaller then edgeThreshold
 
 	// TODO: Get number of vertices
-	unsigned int nVertices = 0;
+	unsigned int nVertices = width * height;
 
 	
 
@@ -46,6 +64,17 @@ bool WriteMesh(Vertex* vertices, unsigned int width, unsigned int height, const 
 
 	// TODO: save vertices
 	
+	outFile << "list of vertices" << std::endl;
+	outFile << "X Y Z R G B A" << std::endl;
+	for (size_t i = 0; i < width * height; i++)
+	{	
+		if (IsValidVertice(vertices[i]))
+		{
+			WriteVertex(outFile, vertices[i]);
+		}else {
+			WriteVertex(outFile, {Vector4f(0, 0, 0, 0), vertices[i].color});
+		}
+	}
 
 	// TODO: save valid faces
 
@@ -60,7 +89,7 @@ int main()
 {
 	// Make sure this path points to the data folder
 	std::string filenameIn = "../../data/rgbd_dataset_freiburg1_xyz/";
-	std::string filenameBaseOut = "mesh_";
+	std::string filenameBaseOut = "meshes/mesh_";
 
 	// load video
 	std::cout << "Initialize virtual sensor..." << std::endl;
@@ -100,25 +129,30 @@ int main()
 		// vertices[idx].position = Vector4f(MINF, MINF, MINF, MINF);
 		// vertices[idx].color = Vector4uc(0,0,0,0);
 		// otherwise apply back-projection and transform the vertex to world space, use the corresponding color from the colormap
-		Vertex* vertices = new Vertex[sensor.GetDepthImageWidth() * sensor.GetDepthImageHeight()];
-		for (size_t i = 0; i < sensor.GetDepthImageWidth; i++) {
-			for (size_t j = 0; j < sensor.GetDepthImageHeight; j++){
-				size_t idx = i * sensor.GetDepthImageWidth() + j;
+
+		MatrixXf identity = MatrixXf::Identity(4, 3);
+		Matrix3f depthIntrinsicsInv = depthIntrinsics.inverse();
+
+		int depth_height = sensor.GetDepthImageHeight();
+		int depth_width = sensor.GetDepthImageWidth();
+		Vertex* vertices = new Vertex[depth_height * depth_width];
+		for (size_t i = 0; i < depth_height; i++) {
+			for (size_t j = 0; j < depth_width; j++){
+				size_t idx = i * depth_width + j;
 				if (depthMap[idx] == MINF){
 					vertices[idx].position = Vector4f(MINF, MINF, MINF, MINF);
-					vertices[idx].color = Vector4uc(0,0,0,0);
+					vertices[idx].color = Vector4uc(0, 0, 0, 0);
 				}else {
-					Vector3f pPixel(i * depthMap[idx], j * depthMap[idx], depthMap[idx]);
-					Vector4f pImage = MatrixXf::Identity(4, 3) * depthIntrinsics.inverse() * pPixel;
-					Vector4f pCamera = trajectory.inverse() * pImage;
-					vertices[idx].position = pCamera;
+					Vector3f pImage(j * depthMap[idx], i * depthMap[idx], depthMap[idx]);
+					Vector4f pCamera = identity * depthIntrinsicsInv * pImage;
+					Vector4f pWorld = trajectoryInv * depthExtrinsicsInv * pCamera;
+					vertices[idx].position = pWorld;
 					vertices[idx].color = Vector4uc(
 						colorMap[4 * idx + 0], colorMap[4 * idx + 1],
 						colorMap[4 * idx + 2], colorMap[4 * idx + 3]);	
 				}
 			}
 		}		
-
 
 		// write mesh file
 		std::stringstream ss;
