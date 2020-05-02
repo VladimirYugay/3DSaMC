@@ -1,10 +1,17 @@
 #include <iostream>
 #include <fstream>
 #include <array>
+#include <vector> 
 
 #include "Eigen.h"
 
 #include "VirtualSensor.h"
+
+struct Face{
+	int x;
+	int y;
+	int z;
+};
 
 struct Vertex
 {
@@ -16,11 +23,29 @@ struct Vertex
 	Vector4uc color;
 };
 
-bool IsValidVertice(const Vertex& vertex)
+bool IsFace(Vertex* vertices, int i, int j, int k, const float threshold)
+{
+	return (vertices[i].position - vertices[j].position).norm() < threshold && 
+		   (vertices[i].position - vertices[k].position).norm() < threshold &&
+		   (vertices[j].position - vertices[k].position).norm() < threshold;
+}
+
+bool IsValidPosition(const size_t& i, const size_t& j, const int& width, const int& height){
+	return i + 1 < height && j + 1 < width;
+}
+
+bool IsValidVertex(const Vertex& vertex)
 {
 	return vertex.position[0] != MINF && 
 		   vertex.position[1] != MINF &&
 		   vertex.position[2] != MINF;
+}
+
+void WriteFace(std::ofstream& outFile, int i, int j, int k){
+	outFile << 3 << " "
+			<< i << " " 
+			<< j << " " 
+			<< k << std::endl;
 }
 
 void WriteVertex(std::ofstream& outFile, const Vertex& vertex)
@@ -49,10 +74,31 @@ bool WriteMesh(Vertex* vertices, unsigned int width, unsigned int height, const 
 	// TODO: Get number of vertices
 	unsigned int nVertices = width * height;
 
-	
-
 	// TODO: Determine number of valid faces
-	unsigned nFaces = 0;
+	
+	std::vector<Face> faces;
+	for (size_t i = 0; i < height; i++)
+	{
+		for (size_t j = 0; j < width; j++)
+		{
+			if (IsValidPosition(i, j, width, height))
+			{
+				int topLeft = i * width + j;
+				int bottomLeft = (i + 1) * width + j;
+				int bottomRight = bottomLeft + 1;
+				int topRight = topLeft + 1;
+				if (IsFace(vertices, topLeft, bottomLeft, bottomRight, edgeThreshold))
+				{
+					faces.push_back({topLeft, bottomLeft, bottomRight});
+				}
+				if (IsFace(vertices, topLeft, bottomRight, topRight, edgeThreshold))
+				{
+					faces.push_back({topLeft, bottomRight, topRight});
+				}
+
+			}
+		}
+	}
 
 	// Write off file
 	std::ofstream outFile(filename);
@@ -60,15 +106,13 @@ bool WriteMesh(Vertex* vertices, unsigned int width, unsigned int height, const 
 
 	// write header
 	outFile << "COFF" << std::endl;
-	outFile << nVertices << " " << nFaces << " 0" << std::endl;
+	outFile << nVertices << " " << faces.size() << " 0" << std::endl;
 
 	// TODO: save vertices
 	
-	outFile << "list of vertices" << std::endl;
-	outFile << "X Y Z R G B A" << std::endl;
 	for (size_t i = 0; i < width * height; i++)
 	{	
-		if (IsValidVertice(vertices[i]))
+		if (IsValidVertex(vertices[i]))
 		{
 			WriteVertex(outFile, vertices[i]);
 		}else {
@@ -77,6 +121,9 @@ bool WriteMesh(Vertex* vertices, unsigned int width, unsigned int height, const 
 	}
 
 	// TODO: save valid faces
+	for (size_t i = 0; i < faces.size(); i++){
+		WriteFace(outFile, faces[i].x, faces[i].x, faces[i].z);
+	}
 
 
 	// close file
