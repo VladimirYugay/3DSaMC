@@ -30,10 +30,6 @@ bool IsFace(Vertex* vertices, int i, int j, int k, const float threshold)
 		   (vertices[j].position - vertices[k].position).norm() < threshold;
 }
 
-bool IsValidPosition(const size_t& i, const size_t& j, const int& width, const int& height){
-	return i + 1 < height && j + 1 < width;
-}
-
 bool IsValidVertex(const Vertex& vertex)
 {
 	return vertex.position[0] != MINF && 
@@ -77,25 +73,21 @@ bool WriteMesh(Vertex* vertices, unsigned int width, unsigned int height, const 
 	// TODO: Determine number of valid faces
 	
 	std::vector<Face> faces;
-	for (size_t i = 0; i < height; i++)
+	for (size_t i = 0; i < height - 1; i++)
 	{
-		for (size_t j = 0; j < width; j++)
+		for (size_t j = 0; j < width - 1; j++)
 		{
-			if (IsValidPosition(i, j, width, height))
+			int topLeft = i * width + j;
+			int bottomLeft = (i + 1) * width + j;
+			int topRight = topLeft + 1;
+			int bottomRight = bottomLeft + 1;
+			if (IsFace(vertices, topLeft, bottomLeft, topRight, edgeThreshold))
 			{
-				int topLeft = i * width + j;
-				int bottomLeft = (i + 1) * width + j;
-				int bottomRight = bottomLeft + 1;
-				int topRight = topLeft + 1;
-				if (IsFace(vertices, topLeft, bottomLeft, bottomRight, edgeThreshold))
-				{
-					faces.push_back({topLeft, bottomLeft, bottomRight});
-				}
-				if (IsFace(vertices, topLeft, bottomRight, topRight, edgeThreshold))
-				{
-					faces.push_back({topLeft, bottomRight, topRight});
-				}
-
+				faces.push_back({topLeft, bottomLeft, topRight});
+			}
+			if (IsFace(vertices, topLeft, bottomRight, topRight, edgeThreshold))
+			{
+				faces.push_back({topLeft, bottomRight, topRight});
 			}
 		}
 	}
@@ -122,7 +114,7 @@ bool WriteMesh(Vertex* vertices, unsigned int width, unsigned int height, const 
 
 	// TODO: save valid faces
 	for (size_t i = 0; i < faces.size(); i++){
-		WriteFace(outFile, faces[i].x, faces[i].x, faces[i].z);
+		WriteFace(outFile, faces[i].x, faces[i].y, faces[i].z);
 	}
 
 
