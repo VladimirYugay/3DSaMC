@@ -3,6 +3,8 @@
 #ifndef IMPLICIT_SURFACE_H
 #define IMPLICIT_SURFACE_H
 
+#include <cmath>
+
 #include "Eigen.h"
 #include "SimpleMesh.h"
 
@@ -23,7 +25,7 @@ public:
 	double Eval(const Eigen::Vector3d& _x)
 	{
 		// TODO: implement the implicit sphere formula using the member variables m_center and m_radius
-		return 0.0;
+		return (_x - m_center).norm() - m_radius;
 	}
 
 private:
@@ -42,7 +44,9 @@ public:
 	double Eval(const Eigen::Vector3d& _x)
 	{
 		// TODO: implement the implicit torus formula using the  variables m_center, m_radius (radius of the ring) and the radius m_a (small radius)
-		return 0.0;
+		Eigen::Vector3d x = _x - m_center;
+		Eigen::Vector2d xy = Eigen::Vector2d(x[0], x[1]);
+		return x.squaredNorm() + std::pow(m_radius, 2) - std::pow(m_a, 2) - 2 * m_radius * xy.norm();
 	}
 
 private:
