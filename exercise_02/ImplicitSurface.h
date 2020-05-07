@@ -43,7 +43,21 @@ public:
 
 	double Eval(const Eigen::Vector3d& _x)
 	{
-		// TODO: implement the implicit torus formula using the  variables m_center, m_radius (radius of the ring) and the radius m_a (small radius)
+		// TODO: implement the implicit torus formula using the  variables m_center, m_radius (radius of the ring) and the radius m_a (small radius)                               _
+		//  _._ _..._ .-',     _.._(`))
+		// '-. `     '  /-._.-'    ',/
+		//    )         \            '.
+		//   / \    /    |             \
+		//  |  0    0    /              |
+		//  \   .-.                     ;  
+		//   '-('' ).-'       ,'       ;
+		//      '-;           |      .'
+		//         \           \    /
+		//         | 7  .__  _.-\   \
+		//         | |  |  ``/  /`  /
+		//        /,_|  |   /,_/   /
+		//           /,_/      '`-'
+		//
 		Eigen::Vector3d x = _x - m_center;
 		Eigen::Vector2d xy = Eigen::Vector2d(x[0], x[1]);
 		return x.squaredNorm() + std::pow(m_radius, 2) - std::pow(m_a, 2) - 2 * m_radius * xy.norm();
@@ -74,7 +88,7 @@ public:
 		Eigen::Vector3f n = m_pointcloud.GetNormals()[idx];
 
 		// TODO: implement the evaluation using Hoppe's method (see lecture slides)
-		return 0.0;
+		return (x - p).dot(n);
 	}
 
 private:
