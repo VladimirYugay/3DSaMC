@@ -19,7 +19,7 @@ int main()
 	surface = new RBF(filenameIn);
 
 	// fill volume with signed distance values
-	unsigned int mc_res = 50; // resolution of the grid, for debugging you can reduce the resolution (-> faster)
+	unsigned int mc_res = 20; // resolution of the grid, for debugging you can reduce the resolution (-> faster)
 	Volume vol(Vector3d(-0.1,-0.1,-0.1), Vector3d(1.1,1.1,1.1), mc_res, mc_res, mc_res, 1);
 	for (unsigned int x = 0; x < vol.getDimX(); x++)
 	{
