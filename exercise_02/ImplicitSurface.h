@@ -169,7 +169,13 @@ public:
 		// hint: Eigen provides a norm() function to compute the l2-norm of a vector (e.g. see macro phi(i,j))
 		double result = 0.0;
 
-
+		for (size_t i = 0; i < m_numCenters; i++){
+			result += (m_funcSamp.m_pos[i] - _x).norm() * m_coefficents[i];
+		}
+		result += m_coefficents[m_numCenters] * _x[0];
+		result += m_coefficents[m_numCenters + 1] * _x[1];
+		result += m_coefficents[m_numCenters + 2] * _x[2];
+		result += m_coefficents[m_numCenters + 3];
 		return result;
 	}
 
@@ -194,12 +200,39 @@ private:
 		// note that all sample points (both on and off surface points) are stored in m_funcSamp
 		// you can access matrix elements using for example A(i,j) for the i-th row and j-th column
 		// similar you access the elements of the vector b, e.g. b(i) for the i-th element
+		
+		// Fill on surface part
+		for (size_t i = 0; i < m_numCenters; i++)
+		{
+			for (size_t j = 0; j < m_numCenters; j++)
+			{
+				A(i, j) = (m_funcSamp.m_pos[i] - m_funcSamp.m_pos[j]).norm();
+			} 
+			A(i, m_numCenters) = m_funcSamp.m_pos[i][0];
+			A(i, m_numCenters + 1) = m_funcSamp.m_pos[i][1];
+			A(i, m_numCenters + 2) = m_funcSamp.m_pos[i][2];
+			A(i, m_numCenters + 3) = 1;
+		}
 
+		// Fill off surface part
+		for (size_t i = m_numCenters; i < 2 * m_numCenters; i++)
+		{
+			for (size_t j = 0; j < m_numCenters; j++)
+			{
+				A(i, j) = (m_funcSamp.m_pos[i] - m_funcSamp.m_pos[j + m_numCenters]).norm();
+			}
+			A(i, m_numCenters) = m_funcSamp.m_pos[i][0];
+			A(i, m_numCenters + 1) = m_funcSamp.m_pos[i][1];
+			A(i, m_numCenters + 2) = m_funcSamp.m_pos[i][2];
+			A(i, m_numCenters + 3) = 1;
+		}
 
-
-
-
-
+		// Fill rhs
+		double eps = 0.01f;
+		for (size_t i = m_numCenters; i < 2 * m_numCenters; i++){
+			b[i] = eps;
+			eps *= -1;
+		}
 
 
 		// build the system matrix and the right hand side of the normal equation
