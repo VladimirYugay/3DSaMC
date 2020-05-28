@@ -9,10 +9,9 @@ set(LIBRARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../libs CACHE PATH "Path to lib fold
 set(Eigen3_INCLUDE_DIR ${LIBRARY_DIR}/Eigen/ CACHE PATH "Path to Eigen source folder")
 # set(Ceres_INCLUDE_DIR ${LIBRARY_DIR}/ceres-solver/include CACHE PATH "Path to ceres source folder")
 # set(glog_DIR_HINT ${LIBRARY_DIR}/glog-lib/ CACHE PATH "Path to glog source folder")
-set(glog_INCLUDE_DIR ${LIBRARY_DIR}/glog-lib/include CACHE PATH "Path to glog source folder")
-set(Ceres_DIR ${LIBRARY_DIR}/Ceres/CMake CACHE PATH "Path to Ceres build folder")
+set(glog_INCLUDE_DIR ${LIBRARY_DIR}/glog/include CACHE PATH "Path to glog source folder")
+set(Ceres_DIR ${LIBRARY_DIR}/ceres/lib/cmake/Ceres CACHE PATH "Path to Ceres build folder")
 set(Ceres_INCLUDE_DIR ${Ceres_DIR}/../include)
-
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${Ceres_DIR})
 
 # Set C++ flags
@@ -50,9 +49,4 @@ target_link_libraries(surface ceres glog::glog)
 target_include_directories(gaussian PUBLIC ${Eigen3_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}  ${Ceres_INCLUDE_DIR} ${glog_INCLUDE_DIR})
 target_include_directories(dragon PUBLIC ${Eigen3_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${Ceres_INCLUDE_DIR} ${glog_INCLUDE_DIR})
 target_include_directories(surface PUBLIC ${Eigen3_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${Ceres_INCLUDE_DIR} ${glog_INCLUDE_DIR})
-
-# # Visual Studio properties
-# set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT exercise_03)
-# set_property(TARGET exercise_03 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/)
-
 

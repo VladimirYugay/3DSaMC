@@ -7,8 +7,7 @@
 
 struct GaussianCostFunction
 {
-	GaussianCostFunction(const Point2D& point_)
-		: point(point_)
+	GaussianCostFunction(const Point2D& point_): point(point_)
 	{
 	}
 
@@ -16,8 +15,9 @@ struct GaussianCostFunction
 	bool operator()(const T* const mu, const T* const sigma, T* residual) const
 	{
 		// TODO: Implement the cost function
-		residual[0] = T(0.0);
-
+		residual[0] = point.y - ceres::exp(
+			-0.5 * ceres::pow(point.x - mu[0], 2) / ceres::pow(sigma[0], 2)) / 
+			(sigma[0] * ceres::sqrt(2 * ceres::atan(1) * 4));
 		return true;
 	}
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 	google::InitGoogleLogging(argv[0]);
 
 	// Read data points
-	const std::string file_path = "../data/points_gaussian.txt";
+	const std::string file_path = "../../data/exercise_4_data/points_gaussian.txt";
 	const auto points = read_points_from_file<Point2D>(file_path);
 
 	// Good initial values make the optimization easier
