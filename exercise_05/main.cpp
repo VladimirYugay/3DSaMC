@@ -17,8 +17,8 @@
 
 void debugCorrespondenceMatching() {
 	// Load the source and target mesh.
-	const std::string filenameSource = std::string("../data/bunny/bunny_part2_trans.off");
-	const std::string filenameTarget = std::string("../data/bunny/bunny_part1.off");
+	const std::string filenameSource = std::string("../../data/exercise_5_data/bunny/bunny_part2_trans.off");
+	const std::string filenameTarget = std::string("../../data/exercise_5_data/bunny/bunny_part1.off");
 
 	SimpleMesh sourceMesh;
 	if (!sourceMesh.loadMesh(filenameSource)) {
@@ -60,8 +60,8 @@ void debugCorrespondenceMatching() {
 
 int alignBunnyWithICP() {
 	// Load the source and target mesh.
-	const std::string filenameSource = std::string("../data/bunny/bunny_part2_trans.off");
-	const std::string filenameTarget = std::string("../data/bunny/bunny_part1.off");
+	const std::string filenameSource = std::string("../../data/exercise_5_data/bunny/bunny_part2_trans.off");
+	const std::string filenameTarget = std::string("../../data/exercise_5_data/bunny/bunny_part1.off");
 
 	SimpleMesh sourceMesh;
 	if (!sourceMesh.loadMesh(filenameSource)) {
