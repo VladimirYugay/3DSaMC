@@ -254,7 +254,10 @@ protected:
 				const auto& targetNormal = targetNormals[match.idx];
 
 				// TODO: Invalidate the match (set it to -1) if the angle between the normals is greater than 60
-				
+				double angle = std::acos(sourceNormal.dot(targetNormal) / (sourceNormal.norm() * targetNormal.norm()));
+				if (angle > 1.04) {
+					match.idx = -1;
+				}
 			}
 		}
 	}
