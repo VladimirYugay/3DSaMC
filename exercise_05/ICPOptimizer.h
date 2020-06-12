@@ -449,37 +449,34 @@ private:
 			const auto& n = targetNormals[i];
 
 			// TODO: Add the point-to-plane constraints to the system
-
-
-
-
-
-
+			A(4 * i , 0) = n(2) * s(1) - n(1) * s(2);
+			A(4 * i, 1) = n(0) * s(2) - n(2) * s(0);
+			A(4 * i, 2) = n(1) * s(0) - n(0) * s(1);
+			A(4 * i, 3) = n(0);
+			A(4 * i, 4) = n(1);
+			A(4 * i, 5) = n(2);	
+			b(4 * i) = n(0) * d(0) + n(1) * d(1) + n(2) * d(2) - n(0) * s(0) - n(1) * s(1) - n(2) * s(2);
 
 			// TODO: Add the point-to-point constraints to the system
+			A(4 * i + 1, 1) = s(2);
+			A(4 * i + 1, 2) = -s(1);
+			A(4 * i + 1, 3) = 1.0f;
+			b(4 * i + 1) = d(0) - s(0);
 
+			A(4 * i + 2, 0) = -s(2);
+			A(4 * i + 2, 2) = s(0);
+			A(4 * i + 2, 4) = 1.0f;
+			b(4 * i + 2) = d(1) - s(1);
 
-
-
-
-
-			// TODO: Optionally, apply a higher weight to point-to-plane correspondences
-
-
-
-
+			A(4 * i + 3, 0) = s(1);
+			A(4 * i + 3, 1) = -s(0);
+			A(4 * i + 3, 5) = 1.0f;
+			b(4 * i + 3) = d(2) - s(2);
 		}
 
 		// TODO: Solve the system
 		VectorXf x(6);
-
-
-
-
-
-
-
-
+		x = A.bdcSvd(ComputeThinU | ComputeThinV).solve(b);
 		float alpha = x(0), beta = x(1), gamma = x(2);
 
 		// Build the pose matrix
@@ -491,7 +488,8 @@ private:
 
 		// TODO: Build the pose matrix using the rotation and translation matrices
 		Matrix4f estimatedPose = Matrix4f::Identity();
-		
+		estimatedPose.block<3, 3>(0, 0) = rotation;
+		estimatedPose.block<3, 1>(0, 3) = translation;	
 
 
 		return estimatedPose;
