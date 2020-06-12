@@ -12,8 +12,8 @@
 #define USE_POINT_TO_PLANE	0
 #define USE_LINEAR_ICP		1
 
-#define RUN_SHAPE_ICP		1
-#define RUN_SEQUENCE_ICP	0
+#define RUN_SHAPE_ICP		0
+#define RUN_SEQUENCE_ICP	1
 
 void debugCorrespondenceMatching() {
 	// Load the source and target mesh.
@@ -118,7 +118,7 @@ int alignBunnyWithICP() {
 }
 
 int reconstructRoom() {
-	std::string filenameIn = std::string("../data/rgbd_dataset_freiburg1_xyz/");
+	std::string filenameIn = std::string("../../data/exercise_1_data/");
 	std::string filenameBaseOut = std::string("../output/mesh_");
 
 	// Load video
